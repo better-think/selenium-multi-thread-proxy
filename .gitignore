@@ -3,3 +3,4 @@ proxies.txt
 geckodriver.log
 chromedriver.exe
 geckodriver.exe
+*.rar
