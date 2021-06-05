@@ -40,7 +40,7 @@ def get_proxy(proxy_username: str, proxy_password: str) -> Proxy:
 def main(u: str, p: str):
     print('Running process')
     proxy: Proxy = get_proxy(u, p)
-    browser = webdriver.Firefox(proxy)
+    browser = webdriver.Firefox(proxy=proxy)
     browser.get(MAIN_URL)
     good_button = None
 
