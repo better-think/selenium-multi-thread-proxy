@@ -25,8 +25,6 @@ def get_firefox_capabilities():
     proxy_info = proxy_list.split("\n")[randint(0, proxies_length - 1)]
     proxy_ip = proxy_info.split(":")[0]
     proxy_port = proxy_info.split(":")[1]
-    # proxy_username = proxy_info.split(":")[2]
-    # proxy_password = proxy_info.split(":")[3]
     PROXY = f"{proxy_ip}:{proxy_port}"
     firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
     firefox_capabilities['marionette'] = True
@@ -42,17 +40,11 @@ def get_firefox_capabilities():
 
 def main(browser: WebDriver) -> bool:
     print('Running process')
-    # proxy: Proxy = get_proxy(u, p)
-    # browser = webdriver.Firefox(proxy=proxy)
-    # browser = webdriver.Firefox()
     try:
-        # browser.execute_script("window.open('{}','_blank');".format(MAIN_URL))
         browser.refresh()
     except Exception as e:
         print("exception 1 {}".format(e))
-        # browser.close()
         return False
-        # return browser.quit()
 
     good_button = None
 
@@ -64,7 +56,6 @@ def main(browser: WebDriver) -> bool:
                 EC.presence_of_element_located((By.CSS_SELECTOR, BUTTON_PATH))
             )
             print(good_button)
-            # good_button = browser.find_element_by_xpath(BUTTON_XPATH)
         except:
             scroll_to = scroll_to + 400
             browser.execute_script('window.scrollTo(0, {})'.format(scroll_to))
@@ -88,19 +79,19 @@ def main(browser: WebDriver) -> bool:
         return True
     except Exception as e:
         print("exception 2 {}".format(e))
-        # browser.close()
         return False
-        # return browser.quit()
 
 if __name__ == '__main__':
     broswer_count       = 3
     click_count         = 3
     live_thread_count    = 0
 
-    broswer_count = input("How many browser can you run? \n(defualt 3): ")
+    broswer_count = input("How many browser can you run? \n(defualt 3, max 5): ")
 
     if not isinstance(broswer_count, int):
         broswer_count = 3
+    if broswer_count > 5:
+        broswer_count = 5
     print(f"broswer_count {broswer_count}")
 
     threads = []
