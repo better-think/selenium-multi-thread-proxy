@@ -1,19 +1,22 @@
-# import sys
-# import os
-# import pathlib
-from logging import NullHandler
 import time
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.common.proxy import *
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from threading import Thread
 
-BUTTON_XPATH    = '//*[@id="__next"]/div[1]/div[1]/div[2]/div/div[3]/div/div[1]/div[1]/div[4]/div/div[2]/button[1]'
+BUTTON_PATH    = 'button.wn9odt-0:nth-child(1)'
 MAIN_URL        = 'https://coinmarketcap.com/currencies/safememe/'
 clicked_count   = 0
+
+class C_Thread:
+    def __init__(self, index, thread) -> None:
+        self.index = index
+        self.thread = thread
+        pass
 
 def get_firefox_capabilities():
     open_proxy_list =  open("proxies.txt", "r")
@@ -37,91 +40,102 @@ def get_firefox_capabilities():
 
     return firefox_capabilities
 
-
-# def get_proxy(proxy_username: str, proxy_password: str) -> Proxy:
-#     open_proxy_list =  open("proxies.txt", "r")
-#     proxy_list = open_proxy_list.read()
-#     proxies_length = len(proxy_list.split("\n"))
-#     proxy_info = proxy_list.split("\n")[randint(0, proxies_length - 1)]
-#     proxy_ip = proxy_info.split(":")[0]
-#     proxy_port = proxy_info.split(":")[1]
-#     # proxy_username = proxy_info.split(":")[2]
-#     # proxy_password = proxy_info.split(":")[3]
-#     myProxy = f"{proxy_ip}:{proxy_port}"
-#     proxy = Proxy({
-#         'proxyType': ProxyType.AUTODETECT,
-#         'httpProxy': myProxy,
-#         'ftpProxy': myProxy,
-#         'sslProxy': myProxy,
-#         'noProxy': '',
-#         'socksUsername': proxy_username,
-#         'socksPassword': proxy_password
-#     })
-#     print(f"You are loging in this proxy : ip address : {proxy_ip}, port : {proxy_port}, user name : {proxy_username}, password : {proxy_password}")
-#     return proxy
-
-def main(u: str, p: str):
+def main(browser: WebDriver) -> bool:
+    print('Running process')
+    # proxy: Proxy = get_proxy(u, p)
+    # browser = webdriver.Firefox(proxy=proxy)
+    # browser = webdriver.Firefox()
     try:
-        print('Running process')
-        # proxy: Proxy = get_proxy(u, p)
-        # browser = webdriver.Firefox(proxy=proxy)
-        firefox_capabilities = get_firefox_capabilities()
-        browser = webdriver.Firefox(capabilities=firefox_capabilities)
+        # browser.execute_script("window.open('{}','_blank');".format(MAIN_URL))
+        browser.refresh()
+    except Exception as e:
+        print("exception 1 {}".format(e))
+        # browser.close()
+        return False
+        # return browser.quit()
 
-        browser.get(MAIN_URL)
-        good_button = None
+    good_button = None
 
-        scroll_to = 0
-        while good_button is None:
-            try:
-                good_button = WebDriverWait(browser, 0.3).until(
-                    EC.presence_of_element_located((By.XPATH, BUTTON_XPATH))
-                )
-                # good_button = browser.find_element_by_xpath(BUTTON_XPATH)
-            except:
-                scroll_to = scroll_to + 400
-                browser.execute_script('window.scrollTo(0, {})'.format(scroll_to))
-                # print('retrying...')
-                pass
+    scroll_to = 0
+    count = 0
+    while good_button is None:
+        try:
+            good_button = WebDriverWait(browser, 1).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, BUTTON_PATH))
+            )
+            print(good_button)
+            # good_button = browser.find_element_by_xpath(BUTTON_XPATH)
+        except:
+            scroll_to = scroll_to + 400
+            browser.execute_script('window.scrollTo(0, {})'.format(scroll_to))
+            if  count > 8:
+                print("exception 3")
+                return False
+            # print('retrying...')
+            count = count + 1
+            time.sleep(2)
 
+    try:
+        elt = browser.find_element_by_css_selector('.cmc-cookie-policy-banner__close')
+        elt.click()
+    except:
+        print()
+
+    try:
         good_button.click()
         print('clicked')
-        # clicked_count = clicked_count + 1
-        time.sleep(3)
-    except:
-        print("Exception")
-    finally:
-        return browser.quit()
+        time.sleep(5)
+        return True
+    except Exception as e:
+        print("exception 2 {}".format(e))
+        # browser.close()
+        return False
+        # return browser.quit()
 
 if __name__ == '__main__':
     broswer_count       = 3
     click_count         = 3
-    live_tread_count    = 0
-    proxy_username      = ""
-    proxy_password      = ""
+    live_thread_count    = 0
 
     broswer_count = input("How many browser can you run? \n(defualt 3): ")
-
-    proxy_username = input("Proxy user name: ")
-    proxy_password = input("Proxy password: ")
 
     if not isinstance(broswer_count, int):
         broswer_count = 3
     print(f"broswer_count {broswer_count}")
 
-    treads = []
+    threads = []
+
+    browsers = []
+    for i in range(0, broswer_count):
+        firefox_capabilities = get_firefox_capabilities()
+        browser = webdriver.Firefox(capabilities=firefox_capabilities)
+        # browser = webdriver.Firefox()
+        browser.get(MAIN_URL)
+        browsers.append(browser)
+
+    def get_browser_index() -> int:
+        for i in range(0, 3):
+            exists = False
+            for t in threads:
+                if t.index is i:
+                    exists = True
+            if not exists:
+                return i
+
     while True:
         temp = []
-        if live_tread_count < broswer_count:
-            tread: Thread = Thread(target=main, args=(proxy_username, proxy_password))
-            tread.start()
-            treads.append(tread)
-            live_tread_count += 1
-            pass
-        for tread in treads:
-            if tread.is_alive():
-                temp.append(tread)
+        if live_thread_count < broswer_count:
+            browser_index = get_browser_index()
+            thread: Thread = Thread(target=main, args=(browsers[browser_index], ))
+            thread.start()
+            threads.append(C_Thread(browser_index, thread))
+            live_thread_count = live_thread_count + 1
+            browser_index = browser_index + 1
 
-        treads = temp
-        live_tread_count = len(treads)
+        for t in threads:
+            if  t.thread.is_alive():
+                temp.append(C_Thread(t.index, t.thread))
+
+        threads = temp
+        live_thread_count = len(threads)
         time.sleep(randint(1, 4))
