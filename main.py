@@ -47,7 +47,7 @@ def main(browser: WebDriver) -> bool:
         browser.get(MAIN_URL)
 
     except Exception as e:
-        print("exception 1 {}".format(e))
+        # print("exception 1 {}".format(e))
         return False
 
     good_button = None
@@ -64,7 +64,7 @@ def main(browser: WebDriver) -> bool:
             scroll_to = scroll_to + 400
             browser.execute_script('window.scrollTo(0, {})'.format(scroll_to))
             if  count > 8:
-                print("exception 3")
+                # print("exception 3")
                 return False
             # print('retrying...')
             count = count + 1
@@ -85,7 +85,7 @@ def main(browser: WebDriver) -> bool:
         time.sleep(5)
         return True
     except Exception as e:
-        print("exception 2 {}".format(e))
+        # print("exception 2 {}".format(e))
         return False
 
 def RepresentsInt(s):
