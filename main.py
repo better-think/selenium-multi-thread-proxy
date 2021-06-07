@@ -41,9 +41,11 @@ def get_firefox_capabilities():
 def main(browser: WebDriver) -> bool:
     print('Running process')
     try:
-        browser.execute_script('localStorage.clear()')
-        browser.delete_all_cookies()
-        browser.refresh()
+        # browser.execute_script('localStorage.clear()')
+        # browser.delete_all_cookies()
+        # browser.refresh()
+        browser.get(MAIN_URL)
+
     except Exception as e:
         print("exception 1 {}".format(e))
         return False
@@ -77,10 +79,20 @@ def main(browser: WebDriver) -> bool:
     try:
         good_button.click()
         print('clicked')
+        browser.execute_script('localStorage.clear()')
+        browser.delete_all_cookies()
+
         time.sleep(5)
         return True
     except Exception as e:
         print("exception 2 {}".format(e))
+        return False
+
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
         return False
 
 if __name__ == '__main__':
@@ -88,10 +100,13 @@ if __name__ == '__main__':
     click_count         = 3
     live_thread_count    = 0
 
-    broswer_count = int(input("How many browser can you run? \n(defualt 1, max 3): "))
+    broswer_count = input("How many browser can you run? \n(defualt 1, max 3): ")
 
-    if not isinstance(broswer_count, int):
-        broswer_count = 1
+    if RepresentsInt(broswer_count):
+        broswer_count = int(broswer_count)
+    else:
+        broswer_count       = 1
+
     if broswer_count > 3:
         broswer_count = 3
     print(f"broswer_count {broswer_count}")
@@ -100,10 +115,10 @@ if __name__ == '__main__':
 
     browsers = []
     for i in range(0, broswer_count):
-        # firefox_capabilities = get_firefox_capabilities()
-        # browser = webdriver.Firefox(capabilities=firefox_capabilities)
-        browser = webdriver.Firefox()
-        browser.get(MAIN_URL)
+        firefox_capabilities = get_firefox_capabilities()
+        browser = webdriver.Firefox(capabilities=firefox_capabilities)
+        # browser = webdriver.Firefox()
+        # browser.get(MAIN_URL)
         browsers.append(browser)
 
     def get_browser_index() -> int:
