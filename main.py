@@ -41,6 +41,8 @@ def get_firefox_capabilities():
 def main(browser: WebDriver) -> bool:
     print('Running process')
     try:
+        browser.execute_script('localStorage.clear()')
+        browser.delete_all_cookies()
         browser.refresh()
     except Exception as e:
         print("exception 1 {}".format(e))
@@ -82,25 +84,25 @@ def main(browser: WebDriver) -> bool:
         return False
 
 if __name__ == '__main__':
-    broswer_count       = 3
+    broswer_count       = 1
     click_count         = 3
     live_thread_count    = 0
 
-    broswer_count = input("How many browser can you run? \n(defualt 3, max 5): ")
+    broswer_count = int(input("How many browser can you run? \n(defualt 1, max 3): "))
 
     if not isinstance(broswer_count, int):
+        broswer_count = 1
+    if broswer_count > 3:
         broswer_count = 3
-    if broswer_count > 5:
-        broswer_count = 5
     print(f"broswer_count {broswer_count}")
 
     threads = []
 
     browsers = []
     for i in range(0, broswer_count):
-        firefox_capabilities = get_firefox_capabilities()
-        browser = webdriver.Firefox(capabilities=firefox_capabilities)
-        # browser = webdriver.Firefox()
+        # firefox_capabilities = get_firefox_capabilities()
+        # browser = webdriver.Firefox(capabilities=firefox_capabilities)
+        browser = webdriver.Firefox()
         browser.get(MAIN_URL)
         browsers.append(browser)
 
